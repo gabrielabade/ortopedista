@@ -1,16 +1,86 @@
-// Mobile Menu Toggle
-const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-const navLinks = document.querySelector('.nav-links');
+// Menu Mobile com ícone único - VERSÃO CORRIGIDA
+document.addEventListener('DOMContentLoaded', function () {
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  const navLinks = document.querySelector('.nav-links');
+  let touchStartX = 0;
+  let touchEndX = 0;
 
-mobileMenuBtn.addEventListener('click', () => {
-  navLinks.classList.toggle('active');
-});
+  // Criar overlay para fechamento por toque
+  const overlay = document.createElement('div');
+  overlay.className = 'menu-overlay';
+  document.body.appendChild(overlay);
 
-// Close mobile menu when clicking on a link
-document.querySelectorAll('.nav-links a').forEach(link => {
-  link.addEventListener('click', () => {
-    navLinks.classList.remove('active');
+  // Função para alternar o ícone
+  function toggleIcon() {
+    const icon = mobileMenuBtn.querySelector('i');
+    if (icon.classList.contains('fa-bars')) {
+      icon.classList.remove('fa-bars');
+      icon.classList.add('fa-times');
+    } else {
+      icon.classList.remove('fa-times');
+      icon.classList.add('fa-bars');
+    }
+  }
+
+  // Abrir/fechar menu
+  function toggleMenu() {
+    navLinks.classList.toggle('active');
+    mobileMenuBtn.classList.toggle('active');
+    overlay.classList.toggle('active');
+    toggleIcon(); // Alternar o ícone
+
+    // Prevenir scroll do body quando menu está aberto
+    if (navLinks.classList.contains('active')) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Event listener para botão mobile
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', toggleMenu);
+  }
+
+  // Fechar menu ao clicar em um link
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (navLinks.classList.contains('active')) {
+        toggleMenu();
+      }
+    });
   });
+
+  // Fechar menu ao clicar no overlay
+  overlay.addEventListener('click', () => {
+    if (navLinks.classList.contains('active')) {
+      toggleMenu();
+    }
+  });
+
+  // Detectar gestos de arrasto para fechar o menu
+  if (navLinks) {
+    // Evento de toque inicial
+    navLinks.addEventListener('touchstart', function (e) {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    // Evento de toque final
+    navLinks.addEventListener('touchend', function (e) {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    // Verificar direção do arrasto
+    function handleSwipe() {
+      // Se arrastou da direita para a esquerda (>50px)
+      if (touchStartX - touchEndX > 50) {
+        if (navLinks.classList.contains('active')) {
+          toggleMenu();
+        }
+      }
+    }
+  }
 });
 
 // Smooth Scrolling
@@ -33,7 +103,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-// Testimonials Slider - VERSÃO CORRIGIDA
+// Testimonials Slider
 document.addEventListener('DOMContentLoaded', function () {
   const testimonialsTrack = document.querySelector('.testimonials-track');
   const testimonialCards = document.querySelectorAll('.testimonial-card');
